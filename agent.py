@@ -1,20 +1,19 @@
-# template for creating multi agent with crewai and langchain_ibm + WatsonxAI 
- 
+# Basic Multi-Agent Template using CrewAI and WatsonxAI
 from crewai import Crew, Task, Agent
 from crewai_tools import SerperDevTool
-from langchain_ibm import WatsonxAI
-import os 
+from langchain_ibm import WatsonxLLM
+import os
 
 # Import api keys
 os.environ["API_KEY"] = "your_api_key"
-os.environ["SERPER API KEY"] = "your api key"
+os.environ["SERPER_API_KEY"] = "your_serper_api_key"
 
-# parameters
-parameters = {"decoding method": "greedy", "max new tokens": 256}
+# LLM parameters
+parameters = {"decoding_method": "greedy", "max_new_tokens": 256}
 
-# create llm instance
+# Create LLM instance
 llm = WatsonxLLM(
-    model_name="LLM NAME",
+    model_name="LLM_NAME",
     deployment_id="deployment_id",
     service_url="api_url",
     api_key=os.environ["API_KEY"],
@@ -25,9 +24,9 @@ llm = WatsonxLLM(
     max_tokens=1024
 )
 
-# create 2nd llm 
+# Create 2nd LLM for function calling
 function_calling_llm = WatsonxLLM(
-    model_name="LLM NAME",
+    model_name="LLM_NAME",
     deployment_id="deployment_id",
     service_url="api_url",
     api_key=os.environ["API_KEY"],
@@ -38,51 +37,59 @@ function_calling_llm = WatsonxLLM(
     max_tokens=1024
 )
 
-# create agent 
+# Create search tool
+search = SerperDevTool()
+
+# Create researcher agent
 researcher = Agent(
     llm=llm,
     function_calling_llm=function_calling_llm,
-    role="fill in role",
-    goal="fill in goal",
-    backstory="fill in backstory",
+    role="FILL_IN_RESEARCHER_ROLE",
+    goal="FILL_IN_RESEARCHER_GOAL",
+    backstory="FILL_IN_RESEARCHER_BACKSTORY",
     allow_delegation=False,
     tools=[search],
     verbose=1
 )
 
-# create second agent 
+# Create writer agent
 writer = Agent(
     llm=llm,
-    role="fill in role",
-    goal="fill in goal",
-    backstory="fill in backstory",
+    role="FILL_IN_WRITER_ROLE",
+    goal="FILL_IN_WRITER_GOAL",
+    backstory="FILL_IN_WRITER_BACKSTORY",
     allow_delegation=False,
     verbose=1
 )
 
-# create a task 
+# Create research task
 task1 = Task(
-    desccription="fill in task description",
-    expected_output="fill in expected output",
-    output_file="fill in output file",
+    description="FILL_IN_RESEARCH_TASK_DESCRIPTION",
+    expected_output="FILL_IN_RESEARCH_EXPECTED_OUTPUT",
+    output_file="research_output.md",
     agent=researcher
 )
 
-# create a second task 
+# Create writing task
 task2 = Task(
-    desccription="fill in task description",
-    expected_output="fill in expected output",
-    output_file="fill in second output file",
+    description="FILL_IN_WRITING_TASK_DESCRIPTION",
+    expected_output="FILL_IN_WRITING_EXPECTED_OUTPUT",
+    output_file="final_output.md",
     agent=writer
 )
 
-# put all together with the crew 
+# Create and run crew
 crew = Crew(agents=[researcher, writer], tasks=[task1, task2], verbose=1)
-print(crew.kickoff()) 
 
+if __name__ == "__main__":
+    print("Starting basic multi-agent workflow...")
+    result = crew.kickoff()
+    print("Workflow completed!")
+    print(result)
 
-
-# test out llm (run with python agent.py)
-print(llm.invoke("ask a question to llm?"))
+    # Test LLM
+    print("\nTesting LLM:")
+    test_response = llm.invoke("What can you help me with?")
+    print(test_response)
 
 
