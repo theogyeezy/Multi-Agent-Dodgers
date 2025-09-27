@@ -1,7 +1,7 @@
 # template for creating multi agent with crewai and langchain_ibm + WatsonxAI 
  
 from crewai import Crew, Task, Agent
-fromo crewai_tools import SerperDevTool
+from crewai_tools import SerperDevTool
 from langchain_ibm import WatsonxAI
 import os 
 
